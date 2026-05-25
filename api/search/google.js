@@ -12,29 +12,19 @@ export default async function handler(req, res) {
   }
 
   try {
-    const url = `https://duckgo.com/html/?q=${encodeURIComponent(query)}&rpl=1`;
-    const r = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+    const r = await fetch(`https://r.jina.ai/http://duckgo.com/?q=${encodeURIComponent(query)}&format=json`, {
+      headers: { 'User-Agent': 'Mozilla/5.0' }
     });
 
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    
+    const data = await r.json();
 
-    const html = await r.text();
-
-    // Parse matokeo kutoka HTML
-    const results = [];
-    const regex = /<a class="result__a" href="([^"]+)"[^>]*>(.*?)<\/a>[\s\S]*?<a class="result__snippet"[^>]*>(.*?)<\/a>/g;
-    let match;
-
-    while ((match = regex.exec(html))!== null && results.length < 5) {
-      results.push({
-        title: match[2].replace(/<[^>]+>/g, '').trim(),
-        link: match[1],
-        snippet: match[3].replace(/<[^>]+>/g, '').trim()
-      });
-    }
+    const results = (data.results || []).slice(0, 5).map(item => ({
+      title: item.title,
+      link: item.url,
+      snippet: item.description
+    }));
 
     res.json({
       status: true,
