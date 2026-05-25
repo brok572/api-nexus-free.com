@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://api-nexus-free-com.onrender.com/sitemap.xml
