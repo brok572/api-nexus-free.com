@@ -1,13 +1,21 @@
 export default async function handler(req, res) {
-  const { url } = req.query;
+  const { text } = req.query; // badilisha 'url' kuwa 'text'
   
-  const r = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
-  const shortUrl = await r.text();
-  
-  res.json({
-    status: true,
-    original: url,
-    short: shortUrl,
-    author: "@nexus - Nexus AI"
-  });
+  if (!text) {
+    return res.json({ status: false, short: "Missing text", author: "@nexus - Nexus AI" });
+  }
+
+  try {
+    const r = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(text)}`);
+    const shortUrl = await r.text();
+    
+    res.json({
+      status: true,
+      original: text,
+      short: shortUrl,
+      author: "@nexus - Nexus AI"
+    });
+  } catch (err) {
+    res.json({ status: false, short: "Error", author: "@nexus - Nexus AI" });
+  }
 }
