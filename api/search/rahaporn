@@ -1,0 +1,130 @@
+import { parse } from 'node-html-parser';
+
+const BASE = "https://www.rahaporn.com";
+
+function absoluteUrl(base, relative) {
+  if (!relative) return null;
+  if (relative.startsWith("http")) return relative;
+  return base.replace(/\/$/, "") + "/" + relative.replace(/^\//, "");
+}
+
+function cleanTitle(title) {
+  return title
+    .replace(/\d+[KkMm]?/g, '')
+    .replace(/\d{1,2}:\d{2}/g, '')
+    .replace(/\d+%/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export default async function handler(req, res) {
+  const { q } = req.query;
+
+  if (!q) {
+    return res.status(400).json({ status: false, message: "Missing search query (?q=...)" });
+  }
+
+  try {
+    const url = `${BASE}/?s=${encodeURIComponent(q)}`;
+    
+    const html = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0" }
+    }).then(r => r.text());
+
+    const root = parse(html);
+    const articles = root.querySelectorAll("article");
+    const data = [];
+
+    for (const article of articles) {
+      // TITLE + LINK
+      let aNode = article.querySelector("h2 a") || article.querySelector("a");
+      const title = aNode ? cleanTitle(aNode.text) : "";
+      let link = aNode ? absoluteUrl(BASE, aNode.getAttribute("href")) : null;
+
+      // THUMBNAIL
+      const imgNode = article.querySelector("img");
+      let thumb = null;
+      if (imgNode) {
+        thumb = imgNode.getAttribute("src") || imgNode.getAttribute("data-src") || imgNode.getAttribute("srcset");
+        if (thumb) thumb = absoluteUrl(BASE, thumb);
+      }
+
+      // FETCH VIDEO PAGE
+      let video_url = null;
+      let player_url = null;
+      let description = "";
+
+      if (link) {
+        const postHTML = await fetch(link, {
+          headers: { "User-Agent": "Mozilla/5.0" }
+        }).then(r => r.text()).catch(() => null);
+
+        if (postHTML) {
+          const postDoc = parse(postHTML);
+
+          // 1. iframe player-x.php
+          const iframe = postDoc.querySelector("iframe[src*='player-x.php']");
+          if (iframe) {
+            player_url = absoluteUrl(BASE, iframe.getAttribute("src"));
+            
+            const playerHTML = await fetch(player_url, {
+              headers: { "User-Agent": "Mozilla/5.0" }
+            }).then(r => r.text()).catch(() => null);
+
+            if (playerHTML) {
+              const match = playerHTML.match(/source src="([^"]+)"/);
+              if (match) video_url = match[1];
+            }
+          }
+
+          // 2. Fallbacks
+          if (!video_url) {
+            const srcNode = postDoc.querySelector("video source");
+            if (srcNode) video_url = srcNode.getAttribute("src");
+          }
+
+          if (!video_url) {
+            const vNode = postDoc.querySelector("video");
+            if (vNode) video_url = vNode.getAttribute("src");
+          }
+
+          if (!video_url) {
+            const match = postHTML.match(/https?:\/\/[^\s"']+\.(mp4|m3u8|webm)/i);
+            if (match) video_url = match[0];
+          }
+
+          if (video_url) video_url = absoluteUrl(BASE, video_url);
+
+          // DESCRIPTION
+          const descNode = postDoc.querySelector("div.entry-content p");
+          if (descNode) description = descNode.text.trim();
+        }
+      }
+
+      const watch = player_url || link;
+      const download = video_url 
+        ? `https://nexus-pro.xo.je/api/search/download.php?url=${encodeURIComponent(video_url)}` 
+        : null;
+
+      data.push({
+        title,
+        url: link,
+        thumbnail: thumb,
+        video_url,
+        watch,
+        download,
+        description
+      });
+    }
+
+    res.json({
+      status: true,
+      query: q,
+      count: data.length,
+      results: data
+    });
+
+  } catch (err) {
+    res.status(502).json({ status: false, message: "Failed to fetch content", error: err.message });
+  }
+}
