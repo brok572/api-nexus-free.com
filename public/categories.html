@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Categories - Nexus API</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+body{background:#05010a;color:#e5e7eb}
+nav{padding:25px 40px;background:rgba(10,0,20,0.8);backdrop-filter:blur(20px);border-bottom:1px solid #6d28d933}
+nav h1{background:linear-gradient(90deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:28px;font-weight:800}
+.container{max-width:1200px;margin:0 auto;padding:60px 20px}
+h2{font-size:42px;margin-bottom:40px;color:#d8b4fe}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:25px}
+.card{background:rgba(30,0,50,0.6);border:1px solid #6d28d955;border-radius:20px;padding:30px;cursor:pointer;transition:0.3s}
+.card:hover{transform:translateY(-8px);border-color:#a855f7;box-shadow:0 10px 40px #a855f733}
+.card h3{color:#f0abfc;font-size:26px;margin-bottom:12px}
+.card p{color:#a78bfa;margin-bottom:15px}
+.badge{display:inline-block;padding:6px 16px;background:#7c3aed33;border-radius:999px;font-size:13px;color:#c4b5fd;font-weight:600}
+.endpoint{background:rgba(20,0,35,0.8);border:1px solid #6d28d944;border-radius:16px;margin-bottom:15px;overflow:hidden}
+.ep-head{padding:20px;cursor:pointer;display:flex;align-items:center;gap:15px}
+.method{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:800;background:#22c55e;color:#000}
+.ep-body{padding:0 20px 20px;display:none;border-top:1px solid #6d28d933}
+.ep-body.active{display:block}
+input{width:100%;padding:14px;margin:12px 0;border-radius:12px;border:1px solid #6d28d955;background:rgba(10,0,20,0.8);color:#fff;font-size:16px}
+button{padding:14px 28px;background:linear-gradient(90deg,#a855f7,#ec4899);border:none;border-radius:12px;color:#0f172a;font-weight:800;cursor:pointer;margin-top:10px;font-size:16px}
+pre{background:#000;padding:15px;border-radius:12px;overflow-x:auto;margin-top:15px;font-size:13px}
+.back{display:inline-block;margin-bottom:30px;color:#a5b4fc;text-decoration:none;font-weight:600}
+</style>
+</head>
+<body>
+<nav><h1>Nexus Free</h1></nav>
+<div class="container">
+  <div id="catView">
+    <h2>Categories</h2>
+    <div id="catGrid" class="grid"></div>
+  </div>
+  <div id="epView" style="display:none">
+    <a href="#" class="back" onclick="showCats()">← Back to Categories</a>
+    <h2 id="catTitle"></h2>
+    <div id="epList"></div>
+  </div>
+</div>
+<script>
+async function loadCats(){
+  const res = await fetch('/api/categories');
+  const data = await res.json();
+  document.getElementById('catGrid').innerHTML = data.categories.map(c => `
+    <div class="card" onclick="loadEps('${c.slug}')">
+      <h3>${c.name}</h3>
+      <p>${c.desc}</p>
+      <span class="badge">${c.count} Endpoints</span>
+    </div>
+  `).join('');
+}
+
+async function loadEps(slug){
+  const res = await fetch(`/api/endpoints?category=${slug}`);
+  const data = await res.json();
+  document.getElementById('catView').style.display = 'none';
+  document.getElementById('epView').style.display = 'block';
+  document.getElementById('catTitle').textContent = data.category;
+  document.getElementById('epList').innerHTML = data.endpoints.map(e => `
+    <div class="endpoint">
+      <div class="ep-head" onclick="toggle('${e.path}')"><span class="method">${e.method}</span><strong>${e.name}</strong><span>${e.path}</span></div>
+      <div class="ep-body" id="body-${e.path}">
+        <input type="text" id="inp-${e.path}" placeholder="Enter text">
+        <button onclick="test('${e.path}')">Execute</button>
+        <pre id="out-${e.path}">Click Execute</pre>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggle(path){document.getElementById(`body-${path}`).classList.toggle('active')}
+async function test(path){
+  const val = document.getElementById(`inp-${path}`).value;
+  const out = document.getElementById(`out-${path}`);
+  out.textContent = 'Loading...';
+  try{
+    const res = await fetch(`${path}?text=${encodeURIComponent(val)}`);
+    out.textContent = JSON.stringify(await res.json(),null,2);
+  }catch(e){out.textContent = 'Error: '+e.message}
+function showCats(){document.getElementById('epView').style.display='none';document.getElementById('catView').style.display='block'}
+loadCats();
+</script>
+</body>
+  </html>
