@@ -12,12 +12,16 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// CORS na Content-Type - header ya json iwe tu kwa /api routes
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
-  res.header('Content-Type', 'application/json');
+  if (req.path.startsWith('/api/')) {
+    res.header('Content-Type', 'application/json');
+  }
   next();
 });
 
+// Auto-scan categories na endpoints
 function getCategories() {
   const apiDir = path.join(__dirname, 'api');
   const categories = {};
@@ -45,6 +49,7 @@ function getCategories() {
   return categories;
 }
 
+// GET /api/categories
 app.get('/api/categories', (req, res) => {
   const cats = getCategories();
   const result = Object.keys(cats).map(k => ({
@@ -56,11 +61,14 @@ app.get('/api/categories', (req, res) => {
   res.json({status: true, categories: result});
 });
 
+// GET /api/endpoints?category=ai
 app.get('/api/endpoints', (req, res) => {
   const { category } = req.query;
   const cats = getCategories();
 
-  if (!cats[category]) return res.status(404).json({status: false, error: 'Category not found'});
+  if (!cats[category]) {
+    return res.status(404).json({status: false, error: 'Category not found'});
+  }
 
   const endpoints = cats[category].endpoints.map(name => ({
     method: 'GET',
@@ -73,6 +81,7 @@ app.get('/api/endpoints', (req, res) => {
   res.json({status: true, category: cats[category].name, endpoints});
 });
 
+// Run any endpoint dynamically
 app.get('/api/:category/:endpoint', async (req, res) => {
   const { category, endpoint } = req.params;
   const filePath = path.join(__dirname, 'api', category, `${endpoint}.js`);
