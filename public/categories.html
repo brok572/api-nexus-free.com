@@ -35,7 +35,7 @@ body::before {
   content:'';
   position:fixed;
   inset:0;
-  background: radial-gradient(circle at 20% 20%,#7c3aed33 0%,transparent 50%), 
+  background: radial-gradient(circle at 20% 20%,#7c3aed33 0%,transparent 50%),
               radial-gradient(circle at 80% 80%,#ec489933 0%,transparent 50%);
   pointer-events:none;
   z-index:-1;
@@ -291,6 +291,31 @@ input[type="text"], input[type="file"] {
   gap:8px;
 }
 
+.tabs {
+  display:flex;
+  gap:4px;
+  margin-bottom:12px;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;
+}
+
+.tab {
+  padding:10px 16px;
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-weight:600;
+  border-bottom:2px solid transparent;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+
+.tab.active {
+  color:var(--text);
+  border-bottom-color:var(--purple);
+}
+
 .code-block {
   background:#000;
   border-radius:10px;
@@ -307,7 +332,7 @@ input[type="text"], input[type="file"] {
   word-wrap:break-word;
 }
 
-.code-block img, .code-block audio {
+.code-block img,.code-block audio {
   max-width:100%;
   border-radius:8px;
   display:block;
@@ -393,13 +418,13 @@ input[type="text"], input[type="file"] {
 }
 
 @media(max-width:768px){
-  .container{padding:20px 14px}
-  .hero-banner{height:160px}
-  .hero-overlay h1{font-size:22px}
+ .container{padding:20px 14px}
+ .hero-banner{height:160px}
+ .hero-overlay h1{font-size:22px}
   h2{font-size:26px}
-  .grid{grid-template-columns:1fr}
-  .ep-header{padding:14px}
-  .ep-section{padding:16px}
+ .grid{grid-template-columns:1fr}
+ .ep-header{padding:14px}
+ .ep-section{padding:16px}
 </style>
 </head>
 <body>
@@ -495,15 +520,19 @@ function renderEndpoints(endpoints){
     const inputFields = e.params.map(p => `
       <div style="margin-bottom:14px">
         <label style="display:block;margin-bottom:6px;font-weight:600;font-size:14px">
-          ${p.name} ${p.required?'*':''} 
+          ${p.name} ${p.required?'*':''}
           <span style="color:var(--muted);font-size:12px">(${p.type || 'text'})</span>
         </label>
-        <input type="${p.type === 'file' ? 'file' : 'text'}" 
-               id="inp-${e.path}" 
+        <input type="${p.type === 'file'? 'file' : 'text'}"
+               id="inp-${e.path}"
                placeholder="${p.desc}"
-               ${p.type === 'file' ? 'accept="image/*,audio/*"' : ''}>
+               ${p.type === 'file'? 'accept="image/*,audio/*"' : ''}
+               oninput="updateCode('${e.path}')">
       </div>
     `).join('');
+
+    const exampleParam = e.params.find(p => p.type === 'text')?.name || 'text';
+    const exampleValue = 'Hello';
 
     return `
     <div class="endpoint-card">
@@ -523,6 +552,40 @@ function renderEndpoints(endpoints){
             <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             Execute
           </button>
+        </div>
+
+        <div class="ep-section">
+          <h4>Code Examples</h4>
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab(event,'curl-${e.path}')">cURL</button>
+            <button class="tab" onclick="switchTab(event,'node-${e.path}')">Node.js</button>
+            <button class="tab" onclick="switchTab(event,'js-${e.path}')">JavaScript</button>
+          </div>
+
+          <div id="curl-${e.path}" class="code-tab">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode('curl-code-${e.path}')">Copy</button>
+              <pre id="curl-code-${e.path}">curl -X GET "${BASE_URL}${e.path}?${exampleParam}=${exampleValue}"</pre>
+            </div>
+          </div>
+
+          <div id="node-${e.path}" class="code-tab" style="display:none">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode('node-code-${e.path}')">Copy</button>
+              <pre id="node-code-${e.path}">const res = await fetch("${BASE_URL}${e.path}?${exampleParam}=${exampleValue}");
+const data = await res.json();
+console.log(data);</pre>
+            </div>
+          </div>
+
+          <div id="js-${e.path}" class="code-tab" style="display:none">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode('js-code-${e.path}')">Copy</button>
+              <pre id="js-code-${e.path}">fetch("${BASE_URL}${e.path}?${exampleParam}=${exampleValue}")
+ .then(res => res.json())
+ .then(data => console.log(data));</pre>
+            </div>
+          </div>
         </div>
 
         <div class="ep-section">
@@ -550,15 +613,37 @@ function renderEndpoints(endpoints){
   }).join('');
 }
 
+function updateCode(path){
+  const input = document.getElementById(`inp-${path}`);
+  const exampleParam = 'text';
+  const value = input.value || 'Hello';
+
+  const curlCode = `curl -X GET "${BASE_URL}${path}?${exampleParam}=${encodeURIComponent(value)}"`;
+  const nodeCode = `const res = await fetch("${BASE_URL}${path}?${exampleParam}=${encodeURIComponent(value)}");
+const data = await res.json();
+console.log(data);`;
+  const jsCode = `fetch("${BASE_URL}${path}?${exampleParam}=${encodeURIComponent(value)}")
+ .then(res => res.json())
+ .then(data => console.log(data));`;
+
+  const curlEl = document.getElementById(`curl-code-${path}`);
+  const nodeEl = document.getElementById(`node-code-${path}`);
+  const jsEl = document.getElementById(`js-code-${path}`);
+
+  if(curlEl) curlEl.textContent = curlCode;
+  if(nodeEl) nodeEl.textContent = nodeCode;
+  if(jsEl) jsEl.textContent = jsCode;
+}
+
 async function test(path){
   const input = document.getElementById(`inp-${path}`);
   const outDiv = document.getElementById(`response-${path}`);
   outDiv.innerHTML = '<div class="code-block"><pre>Loading...</pre></div>';
-  
+
   try {
     let url = path;
     let options = { method: 'GET' };
-    
+
     if (input.type === 'file' && input.files[0]) {
       const formData = new FormData();
       formData.append('file', input.files[0]);
@@ -567,10 +652,10 @@ async function test(path){
     } else if (input.value) {
       url = `${path}?text=${encodeURIComponent(input.value)}`;
     }
-    
+
     const res = await fetch(url, options);
     const contentType = res.headers.get('content-type') || '';
-    
+
     if (contentType.includes('image/')) {
       const blob = await res.blob();
       const imgUrl = URL.createObjectURL(blob);
@@ -609,6 +694,14 @@ async function test(path){
 
 function toggle(path){
   document.getElementById(`body-${path}`).classList.toggle('active');
+}
+
+function switchTab(e,id){
+  const parent = e.target.closest('.ep-section');
+  parent.querySelectorAll('.code-tab').forEach(t=>t.style.display='none');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).style.display='block';
+  e.target.classList.add('active');
 }
 
 function copyCode(id){
