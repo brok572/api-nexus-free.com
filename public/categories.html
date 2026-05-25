@@ -23,6 +23,7 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  padding-bottom: 100px;
 }
 
 body::before {
@@ -35,33 +36,113 @@ body::before {
 }
 
 nav {
-  padding:24px 40px;
+  padding:20px 40px;
   background:rgba(10,0,20,0.8);
   backdrop-filter:blur(20px);
   border-bottom:1px solid var(--border);
   position:sticky;
   top:0;
   z-index:10;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-nav h1 {
+.nav-left {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.dots {
+  display:flex;
+  gap:6px;
+}
+
+.dot {
+  width:8px;
+  height:8px;
+  border-radius:50%;
   background:linear-gradient(90deg,var(--purple),var(--pink));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  font-size:28px;
-  font-weight:800;
+}
+
+.nav-right .btn-sm {
+  padding:10px 20px;
+  background:linear-gradient(90deg,var(--purple),var(--pink));
+  border:none;
+  border-radius:10px;
+  color:#0f172a;
+  font-weight:700;
+  cursor:pointer;
+  font-size:14px;
 }
 
 .container {
   max-width:1300px;
   margin:0 auto;
-  padding:60px 24px;
+  padding:40px 24px;
+}
+
+/* Hero Banner */
+.hero-banner {
+  width:100%;
+  height:280px;
+  border-radius:24px;
+  overflow:hidden;
+  margin-bottom:40px;
+  position:relative;
+  border:1px solid var(--border);
+}
+
+.hero-banner img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.hero-overlay {
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent 0%,rgba(5,1,10,0.9) 100%);
+  display:flex;
+  align-items:flex-end;
+  padding:40px;
+}
+
+.hero-overlay h1 {
+  font-size:42px;
+  font-weight:800;
+  background:linear-gradient(90deg,#c4b5fd,#f0abfc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+/* Search */
+.search-box {
+  margin-bottom:50px;
+}
+
+.search-box input {
+  width:100%;
+  padding:18px 24px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background:var(--card);
+  color:var(--text);
+  font-size:16px;
+  backdrop-filter:blur(10px);
+}
+
+.search-box input:focus {
+  outline:none;
+  border-color:var(--purple);
+  box-shadow:0 0 0 3px #a855f733;
 }
 
 h2 {
-  font-size:48px;
+  font-size:42px;
   font-weight:800;
-  margin-bottom:40px;
+  margin-bottom:32px;
   background:linear-gradient(90deg,#c4b5fd,#f0abfc);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
@@ -151,7 +232,6 @@ h2 {
 .ep-body {
   display:none;
   border-top:1px solid var(--border);
-  padding:0;
 }
 
 .ep-body.active {display:block}
@@ -173,7 +253,7 @@ h2 {
   gap:8px;
 }
 
-input {
+input[type="text"] {
   width:100%;
   padding:14px 18px;
   border-radius:12px;
@@ -182,12 +262,6 @@ input {
   color:var(--text);
   font-size:15px;
   font-family:'JetBrains Mono',monospace;
-}
-
-input:focus {
-  outline:none;
-  border-color:var(--purple);
-  box-shadow:0 0 0 3px #a855f733;
 }
 
 .btn {
@@ -199,15 +273,9 @@ input:focus {
   font-weight:800;
   cursor:pointer;
   font-size:15px;
-  transition:0.2s;
   display:inline-flex;
   align-items:center;
   gap:8px;
-}
-
-.btn:hover {
-  transform:scale(1.02);
-  box-shadow:0 10px 30px #a855f766;
 }
 
 .tabs {
@@ -225,7 +293,6 @@ input:focus {
   cursor:pointer;
   font-weight:600;
   border-bottom:2px solid transparent;
-  transition:0.2s;
 }
 
 .tab.active {
@@ -261,10 +328,6 @@ input:focus {
   font-weight:600;
 }
 
-.copy-btn:hover {
-  background:rgba(124,58,233,0.5);
-}
-
 .status-table {
   width:100%;
   border-collapse:collapse;
@@ -275,11 +338,47 @@ input:focus {
   border-bottom:1px solid var(--border);
 }
 
-.status-table tr:last-child td {border-bottom:none}
-
 .status-ok {color:#22c55e}
 .status-err {color:#ef4444}
 .status-warn {color:#f59e0b}
+
+/* Bottom Nav */
+.bottom-nav {
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(10,0,20,0.95);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-around;
+  padding:16px 0;
+  z-index:10;
+}
+
+.nav-item {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  color:var(--muted);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:600;
+  transition:0.2s;
+}
+
+.nav-item.active,
+.nav-item:hover {
+  color:var(--purple);
+}
+
+.nav-item svg {
+  width:24px;
+  height:24px;
+  fill:currentColor;
+}
 
 .icon {
   width:20px;
@@ -295,19 +394,40 @@ input:focus {
   color:#a5b4fc;
   text-decoration:none;
   font-weight:600;
-  transition:0.2s;
 }
-
-.back:hover {color:#c4b5fd}
-
-svg {flex-shrink:0}
 </style>
 </head>
 <body>
-<nav><h1>Nexus Free API</h1></nav>
+
+<nav>
+  <div class="nav-left">
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <h1 style="font-size:24px;background:linear-gradient(90deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;">Nexus</h1>
+  </div>
+  <div class="nav-right">
+    <button class="btn-sm">Get Started</button>
+  </div>
+</nav>
 
 <div class="container">
   <div id="catView">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfzl-IUu5HC18DZVE6dBV7lmj2iWt8CC4E7nBSFGxFZg&s=10" alt="Hero">
+      <div class="hero-overlay">
+        <h1>Explore 100+ Free APIs</h1>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search APIs..." onkeyup="searchApis()">
+    </div>
+
     <h2>Categories</h2>
     <div id="catGrid" class="grid"></div>
   </div>
@@ -322,8 +442,25 @@ svg {flex-shrink:0}
   </div>
 </div>
 
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <a href="/" class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <span>Home</span>
+  </a>
+  <a href="#" class="nav-item active" onclick="showCats()">
+    <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+    <span>Categories</span>
+  </a>
+  <a href="/about" class="nav-item">
+    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+    <span>About</span>
+  </a>
+</div>
+
 <script>
 const BASE_URL = window.location.origin;
+let allEndpoints = [];
 
 async function loadCats(){
   const res = await fetch('/api/categories');
@@ -340,11 +477,15 @@ async function loadCats(){
 async function loadEps(slug){
   const res = await fetch(`/api/endpoints?category=${slug}`);
   const data = await res.json();
+  allEndpoints = data.endpoints;
   document.getElementById('catView').style.display = 'none';
   document.getElementById('epView').style.display = 'block';
   document.getElementById('catTitle').textContent = data.category;
-  
-  document.getElementById('epList').innerHTML = data.endpoints.map(e => `
+  renderEndpoints(data.endpoints);
+}
+
+function renderEndpoints(endpoints){
+  document.getElementById('epList').innerHTML = endpoints.map(e => `
     <div class="endpoint-card">
       <div class="ep-header" onclick="toggle('${e.path}')">
         <svg class="icon" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
@@ -354,14 +495,8 @@ async function loadEps(slug){
       <div class="ep-body" id="body-${e.path}">
         <div class="ep-section">
           <h4>
-            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             TRY IT OUT
-          </h4>
-          <p style="color:var(--muted);margin-bottom:16px">${e.desc}</p>
-          
-          <h4>
-            <svg class="icon" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
-            Parameters
           </h4>
           ${e.params.map(p => `
             <div style="margin-bottom:16px">
@@ -369,7 +504,6 @@ async function loadEps(slug){
               <input type="text" id="inp-${e.path}" placeholder="${p.desc}">
             </div>
           `).join('')}
-          
           <button class="btn" onclick="test('${e.path}')">
             <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             Execute
@@ -384,7 +518,7 @@ async function loadEps(slug){
           <div class="tabs">
             <button class="tab active" onclick="switchTab(event,'curl-${e.path}')">cURL</button>
             <button class="tab" onclick="switchTab(event,'node-${e.path}')">Node.js</button>
-            <button class="tab" onclick="switchTab(event,'sdk-${e.path}')">@nexray/api</button>
+            <button class="tab" onclick="switchTab(event,'sdk-${e.path}')">@nexus/api</button>
           </div>
           
           <div id="curl-${e.path}" class="code-tab">
@@ -398,65 +532,56 @@ async function loadEps(slug){
             <div class="code-block">
               <button class="copy-btn" onclick="copyCode('node-code-${e.path}')">Copy</button>
               <pre id="node-code-${e.path}">const res = await fetch("${BASE_URL}${e.path}?text=Hi");
-const data = await res.json();
-console.log(data);</pre>
+const data = await res.json();</pre>
             </div>
           </div>
           
           <div id="sdk-${e.path}" class="code-tab" style="display:none">
             <div class="code-block">
               <button class="copy-btn" onclick="copyCode('sdk-code-${e.path}')">Copy</button>
-              <pre id="sdk-code-${e.path}">import { Nexus } from '@nexray/api';
-
-const client = new Nexus();
-const res = await client.get('${e.path}', {text:'Hi'});
-console.log(res);</pre>
+              <pre id="sdk-code-${e.path}">import { Nexus } from '@nexus/api';
+const res = await client.get('${e.path}', {text:'Hi'});</pre>
             </div>
           </div>
         </div>
 
         <div class="ep-section">
-          <h4>
-            <svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
-            Response
-          </h4>
+          <h4>Response</h4>
           <div class="code-block">
             <button class="copy-btn" onclick="copyCode('out-${e.path}')">Copy</button>
-            <pre id="out-${e.path}">Click Execute to see response</pre>
+            <pre id="out-${e.path}">Click Execute</pre>
           </div>
         </div>
 
         <div class="ep-section">
-          <h4>
-            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-            HTTP STATUS CODES
-          </h4>
+          <h4>HTTP STATUS CODES</h4>
           <table class="status-table">
-            <tr>
-              <td class="status-ok"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> 200</td>
-              <td>OK - Request successful</td>
-            </tr>
-            <tr>
-              <td class="status-err"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> 400</td>
-              <td>Bad Request - Invalid parameters</td>
-            </tr>
-            <tr>
-              <td class="status-err"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> 405</td>
-              <td>Method Not Allowed</td>
-            </tr>
-            <tr>
-              <td class="status-warn"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> 429</td>
-              <td>Too Many Requests - Rate limit exceeded</td>
-            </tr>
-            <tr>
-              <td class="status-err"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> 500</td>
-              <td>Internal Server Error</td>
-            </tr>
+            <tr><td class="status-ok">200</td><td>OK - Request successful</td></tr>
+            <tr><td class="status-err">400</td><td>Bad Request - Invalid parameters</td></tr>
+            <tr><td class="status-err">405</td><td>Method Not Allowed</td></tr>
+            <tr><td class="status-warn">429</td><td>Too Many Requests</td></tr>
+            <tr><td class="status-err">500</td><td>Internal Server Error</td></tr>
           </table>
         </div>
       </div>
     </div>
   `).join('');
+}
+
+function searchApis(){
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  if(!query){
+    loadCats();
+    return;
+  }
+  // Simple search by filtering categories
+  const filtered = allEndpoints.filter(e => e.path.toLowerCase().includes(query));
+  if(filtered.length > 0){
+    document.getElementById('catView').style.display = 'none';
+    document.getElementById('epView').style.display = 'block';
+    document.getElementById('catTitle').textContent = 'Search Results';
+    renderEndpoints(filtered);
+  }
 }
 
 function toggle(path){
@@ -484,8 +609,7 @@ function switchTab(e,id){
 }
 
 function copyCode(id){
-  const text = document.getElementById(id).textContent;
-  navigator.clipboard.writeText(text);
+  navigator.clipboard.writeText(document.getElementById(id).textContent);
   event.target.textContent = 'Copied!';
   setTimeout(()=>event.target.textContent='Copy',2000);
 }
