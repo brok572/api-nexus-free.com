@@ -1,48 +1,330 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Categories - Nexus API</title>
+<title>API Docs - Nexus</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
-body{background:#05010a;color:#e5e7eb}
-nav{padding:25px 40px;background:rgba(10,0,20,0.8);backdrop-filter:blur(20px);border-bottom:1px solid #6d28d933}
-nav h1{background:linear-gradient(90deg,#a855f7,#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:28px;font-weight:800}
-.container{max-width:1200px;margin:0 auto;padding:60px 20px}
-h2{font-size:42px;margin-bottom:40px;color:#d8b4fe}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:25px}
-.card{background:rgba(30,0,50,0.6);border:1px solid #6d28d955;border-radius:20px;padding:30px;cursor:pointer;transition:0.3s}
-.card:hover{transform:translateY(-8px);border-color:#a855f7;box-shadow:0 10px 40px #a855f733}
-.card h3{color:#f0abfc;font-size:26px;margin-bottom:12px}
-.card p{color:#a78bfa;margin-bottom:15px}
-.badge{display:inline-block;padding:6px 16px;background:#7c3aed33;border-radius:999px;font-size:13px;color:#c4b5fd;font-weight:600}
-.endpoint{background:rgba(20,0,35,0.8);border:1px solid #6d28d944;border-radius:16px;margin-bottom:15px;overflow:hidden}
-.ep-head{padding:20px;cursor:pointer;display:flex;align-items:center;gap:15px}
-.method{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:800;background:#22c55e;color:#000}
-.ep-body{padding:0 20px 20px;display:none;border-top:1px solid #6d28d933}
-.ep-body.active{display:block}
-input{width:100%;padding:14px;margin:12px 0;border-radius:12px;border:1px solid #6d28d955;background:rgba(10,0,20,0.8);color:#fff;font-size:16px}
-button{padding:14px 28px;background:linear-gradient(90deg,#a855f7,#ec4899);border:none;border-radius:12px;color:#0f172a;font-weight:800;cursor:pointer;margin-top:10px;font-size:16px}
-pre{background:#000;padding:15px;border-radius:12px;overflow-x:auto;margin-top:15px;font-size:13px}
-.back{display:inline-block;margin-bottom:30px;color:#a5b4fc;text-decoration:none;font-weight:600}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+:root {
+  --bg: #05010a;
+  --card: rgba(20, 0, 35, 0.6);
+  --border: #6d28d955;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --text: #e5e7eb;
+  --muted: #a78bfa;
+}
+
+* {margin:0;padding:0;box-sizing:border-box;font-family:'Outfit',sans-serif}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: radial-gradient(circle at 20% 20%,#7c3aed33 0%,transparent 50%), 
+              radial-gradient(circle at 80% 80%,#ec489933 0%,transparent 50%);
+  pointer-events:none;
+}
+
+nav {
+  padding:24px 40px;
+  background:rgba(10,0,20,0.8);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+nav h1 {
+  background:linear-gradient(90deg,var(--purple),var(--pink));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-size:28px;
+  font-weight:800;
+}
+
+.container {
+  max-width:1300px;
+  margin:0 auto;
+  padding:60px 24px;
+}
+
+h2 {
+  font-size:48px;
+  font-weight:800;
+  margin-bottom:40px;
+  background:linear-gradient(90deg,#c4b5fd,#f0abfc);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:24px;
+}
+
+.card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:32px;
+  cursor:pointer;
+  transition:0.3s;
+  backdrop-filter:blur(10px);
+}
+
+.card:hover {
+  transform:translateY(-8px);
+  border-color:var(--purple);
+  box-shadow:0 20px 60px #a855f733;
+}
+
+.card h3 {
+  font-size:28px;
+  font-weight:700;
+  margin-bottom:12px;
+  color:#f0abfc;
+}
+
+.card p {
+  color:var(--muted);
+  margin-bottom:16px;
+}
+
+.badge {
+  display:inline-block;
+  padding:8px 18px;
+  background:#7c3aed33;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:600;
+  color:#c4b5fd;
+}
+
+.endpoint-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  margin-bottom:20px;
+  overflow:hidden;
+  backdrop-filter:blur(10px);
+}
+
+.ep-header {
+  padding:24px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  transition:0.2s;
+}
+
+.ep-header:hover {
+  background:rgba(124,58,233,0.1);
+}
+
+.method {
+  padding:6px 14px;
+  border-radius:8px;
+  font-size:12px;
+  font-weight:800;
+  background:linear-gradient(90deg,#22c55e,#16a34a);
+  color:#000;
+}
+
+.ep-path {
+  font-family:'JetBrains Mono',monospace;
+  font-size:15px;
+  color:#c4b5fd;
+}
+
+.ep-body {
+  display:none;
+  border-top:1px solid var(--border);
+  padding:0;
+}
+
+.ep-body.active {display:block}
+
+.ep-section {
+  padding:28px;
+  border-bottom:1px solid var(--border);
+}
+
+.ep-section:last-child {border-bottom:none}
+
+.ep-section h4 {
+  font-size:16px;
+  font-weight:700;
+  margin-bottom:16px;
+  color:#d8b4fe;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+input {
+  width:100%;
+  padding:14px 18px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(10,0,20,0.8);
+  color:var(--text);
+  font-size:15px;
+  font-family:'JetBrains Mono',monospace;
+}
+
+input:focus {
+  outline:none;
+  border-color:var(--purple);
+  box-shadow:0 0 0 3px #a855f733;
+}
+
+.btn {
+  padding:14px 32px;
+  background:linear-gradient(90deg,var(--purple),var(--pink));
+  border:none;
+  border-radius:12px;
+  color:#0f172a;
+  font-weight:800;
+  cursor:pointer;
+  font-size:15px;
+  transition:0.2s;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+.btn:hover {
+  transform:scale(1.02);
+  box-shadow:0 10px 30px #a855f766;
+}
+
+.tabs {
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+
+.tab {
+  padding:12px 20px;
+  background:transparent;
+  border:none;
+  color:var(--muted);
+  cursor:pointer;
+  font-weight:600;
+  border-bottom:2px solid transparent;
+  transition:0.2s;
+}
+
+.tab.active {
+  color:var(--text);
+  border-bottom-color:var(--purple);
+}
+
+.code-block {
+  background:#000;
+  border-radius:12px;
+  padding:20px;
+  overflow-x:auto;
+  position:relative;
+}
+
+.code-block pre {
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;
+  color:#c4b5fd;
+}
+
+.copy-btn {
+  position:absolute;
+  top:12px;
+  right:12px;
+  padding:6px 12px;
+  background:rgba(124,58,233,0.3);
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--text);
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+}
+
+.copy-btn:hover {
+  background:rgba(124,58,233,0.5);
+}
+
+.status-table {
+  width:100%;
+  border-collapse:collapse;
+}
+
+.status-table td {
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+}
+
+.status-table tr:last-child td {border-bottom:none}
+
+.status-ok {color:#22c55e}
+.status-err {color:#ef4444}
+.status-warn {color:#f59e0b}
+
+.icon {
+  width:20px;
+  height:20px;
+  fill:currentColor;
+}
+
+.back {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:30px;
+  color:#a5b4fc;
+  text-decoration:none;
+  font-weight:600;
+  transition:0.2s;
+}
+
+.back:hover {color:#c4b5fd}
+
+svg {flex-shrink:0}
 </style>
 </head>
 <body>
-<nav><h1>Nexus Free</h1></nav>
+<nav><h1>Nexus Free API</h1></nav>
+
 <div class="container">
   <div id="catView">
     <h2>Categories</h2>
     <div id="catGrid" class="grid"></div>
   </div>
+
   <div id="epView" style="display:none">
-    <a href="#" class="back" onclick="showCats()">← Back to Categories</a>
+    <a href="#" class="back" onclick="showCats()">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M11.67 3.87L9.9 2.1 0 12l9.9 9.9 1.77-1.77L3.54 12z"/></svg>
+      Back to Categories
+    </a>
     <h2 id="catTitle"></h2>
     <div id="epList"></div>
   </div>
 </div>
+
 <script>
+const BASE_URL = window.location.origin;
+
 async function loadCats(){
   const res = await fetch('/api/categories');
   const data = await res.json();
@@ -61,13 +343,117 @@ async function loadEps(slug){
   document.getElementById('catView').style.display = 'none';
   document.getElementById('epView').style.display = 'block';
   document.getElementById('catTitle').textContent = data.category;
+  
   document.getElementById('epList').innerHTML = data.endpoints.map(e => `
-    <div class="endpoint">
-      <div class="ep-head" onclick="toggle('${e.path}')"><span class="method">${e.method}</span><strong>${e.name}</strong><span>${e.path}</span></div>
+    <div class="endpoint-card">
+      <div class="ep-header" onclick="toggle('${e.path}')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
+        <span class="method">${e.method}</span>
+        <span class="ep-path">${e.path}</span>
+      </div>
       <div class="ep-body" id="body-${e.path}">
-        <input type="text" id="inp-${e.path}" placeholder="Enter text">
-        <button onclick="test('${e.path}')">Execute</button>
-        <pre id="out-${e.path}">Click Execute</pre>
+        <div class="ep-section">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            TRY IT OUT
+          </h4>
+          <p style="color:var(--muted);margin-bottom:16px">${e.desc}</p>
+          
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+            Parameters
+          </h4>
+          ${e.params.map(p => `
+            <div style="margin-bottom:16px">
+              <label style="display:block;margin-bottom:8px;font-weight:600">${p.name} ${p.required?'*':''}</label>
+              <input type="text" id="inp-${e.path}" placeholder="${p.desc}">
+            </div>
+          `).join('')}
+          
+          <button class="btn" onclick="test('${e.path}')">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            Execute
+          </button>
+        </div>
+
+        <div class="ep-section">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M9.4 18L8 16.6l4.6-4.6L8 7.4 9.4 6l6 6-6 6z"/></svg>
+            Code Examples
+          </h4>
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab(event,'curl-${e.path}')">cURL</button>
+            <button class="tab" onclick="switchTab(event,'node-${e.path}')">Node.js</button>
+            <button class="tab" onclick="switchTab(event,'sdk-${e.path}')">@nexray/api</button>
+          </div>
+          
+          <div id="curl-${e.path}" class="code-tab">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode('curl-code-${e.path}')">Copy</button>
+              <pre id="curl-code-${e.path}">curl -X GET "${BASE_URL}${e.path}?text=Hi"</pre>
+            </div>
+          </div>
+          
+          <div id="node-${e.path}" class="code-tab" style="display:none">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode('node-code-${e.path}')">Copy</button>
+              <pre id="node-code-${e.path}">const res = await fetch("${BASE_URL}${e.path}?text=Hi");
+const data = await res.json();
+console.log(data);</pre>
+            </div>
+          </div>
+          
+          <div id="sdk-${e.path}" class="code-tab" style="display:none">
+            <div class="code-block">
+              <button class="copy-btn" onclick="copyCode('sdk-code-${e.path}')">Copy</button>
+              <pre id="sdk-code-${e.path}">import { Nexus } from '@nexray/api';
+
+const client = new Nexus();
+const res = await client.get('${e.path}', {text:'Hi'});
+console.log(res);</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="ep-section">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg>
+            Response
+          </h4>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode('out-${e.path}')">Copy</button>
+            <pre id="out-${e.path}">Click Execute to see response</pre>
+          </div>
+        </div>
+
+        <div class="ep-section">
+          <h4>
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+            HTTP STATUS CODES
+          </h4>
+          <table class="status-table">
+            <tr>
+              <td class="status-ok"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> 200</td>
+              <td>OK - Request successful</td>
+            </tr>
+            <tr>
+              <td class="status-err"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> 400</td>
+              <td>Bad Request - Invalid parameters</td>
+            </tr>
+            <tr>
+              <td class="status-err"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> 405</td>
+              <td>Method Not Allowed</td>
+            </tr>
+            <tr>
+              <td class="status-warn"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg> 429</td>
+              <td>Too Many Requests - Rate limit exceeded</td>
+            </tr>
+            <tr>
+              <td class="status-err"><svg class="icon" style="display:inline;vertical-align:middle" viewBox="0 0 24 24"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg> 500</td>
+              <td>Internal Server Error</td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
   `).join('');
@@ -87,6 +473,21 @@ async function test(path){
   }catch(e){
     out.textContent = 'Error: '+e.message;
   }
+}
+
+function switchTab(e,id){
+  const parent = e.target.parentElement.parentElement;
+  parent.querySelectorAll('.code-tab').forEach(t=>t.style.display='none');
+  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).style.display='block';
+  e.target.classList.add('active');
+}
+
+function copyCode(id){
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text);
+  event.target.textContent = 'Copied!';
+  setTimeout(()=>event.target.textContent='Copy',2000);
 }
 
 function showCats(){
