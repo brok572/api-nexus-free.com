@@ -12,19 +12,38 @@ export default async function handler(req, res) {
   }
 
   try {
-    const r = await fetch(`https://r.jina.ai/http://duckgo.com/?q=${encodeURIComponent(query)}&format=json`, {
+    const r = await fetch(`https://r.jina.ai/http://duckgo.com/?q=${encodeURIComponent(query)}`, {
       headers: { 'User-Agent': 'Mozilla/5.0' }
     });
 
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    
-    const data = await r.json();
 
-    const results = (data.results || []).slice(0, 5).map(item => ({
-      title: item.title,
-      link: item.url,
-      snippet: item.description
-    }));
+    const text = await r.text();
+
+    // Chomoa matokeo kutoka markdown
+    const results = [];
+    const regex = /\d+\.\s+\[\[([^\]]+)\]\(([^)]+)\)[^\n]*\n([^\n]+)/g;
+    let match;
+
+    while ((match = regex.exec(text))!== null && results.length < 5) {
+      results.push({
+        title: match[1].trim(),
+        link: match[2].trim(),
+        snippet: match[3].trim()
+      });
+    }
+
+    // Fallback kama regex haipati kitu
+    if (results.length === 0) {
+      const fallback = /\d+\.\s+\[(.*?)\]\((.*?)\)\n(.*?)(?=\n\d+\.|\n*$)/gs;
+      while ((match = fallback.exec(text))!== null && results.length < 5) {
+        results.push({
+          title: match[1].replace(/\[.*?\]\(.*?\)/g, '').trim(),
+          link: match[2].trim(),
+          snippet: match[3].trim()
+        });
+      }
+    }
 
     res.json({
       status: true,
