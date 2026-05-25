@@ -98,7 +98,6 @@ nav {
   padding:24px 16px;
 }
 
-/* Hero Banner */
 .hero-banner {
   width:100%;
   height:200px;
@@ -133,7 +132,6 @@ nav {
   line-height:1.2;
 }
 
-/* Search */
 .search-box {
   margin-bottom:32px;
 }
@@ -268,7 +266,7 @@ h2 {
   gap:8px;
 }
 
-input[type="text"] {
+input[type="text"], input[type="file"] {
   width:100%;
   padding:12px 16px;
   border-radius:10px;
@@ -293,31 +291,6 @@ input[type="text"] {
   gap:8px;
 }
 
-.tabs {
-  display:flex;
-  gap:4px;
-  margin-bottom:12px;
-  border-bottom:1px solid var(--border);
-  overflow-x:auto;
-}
-
-.tab {
-  padding:10px 16px;
-  background:transparent;
-  border:none;
-  color:var(--muted);
-  cursor:pointer;
-  font-weight:600;
-  border-bottom:2px solid transparent;
-  white-space:nowrap;
-  flex-shrink:0;
-}
-
-.tab.active {
-  color:var(--text);
-  border-bottom-color:var(--purple);
-}
-
 .code-block {
   background:#000;
   border-radius:10px;
@@ -332,6 +305,12 @@ input[type="text"] {
   color:#c4b5fd;
   white-space:pre-wrap;
   word-wrap:break-word;
+}
+
+.code-block img, .code-block audio {
+  max-width:100%;
+  border-radius:8px;
+  display:block;
 }
 
 .copy-btn {
@@ -359,7 +338,6 @@ input[type="text"] {
   border-bottom:1px solid var(--border);
 }
 
-/* Bottom Nav */
 .bottom-nav {
   position:fixed;
   bottom:0;
@@ -414,7 +392,6 @@ input[type="text"] {
   font-size:14px;
 }
 
-/* Mobile Fixes */
 @media(max-width:768px){
   .container{padding:20px 14px}
   .hero-banner{height:160px}
@@ -441,7 +418,6 @@ input[type="text"] {
 
 <div class="container">
   <div id="catView">
-    <!-- Hero Banner -->
     <div class="hero-banner">
       <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfzl-IUu5HC18DZVE6dBV7lmj2iWt8CC4E7nBSFGxFZg&s=10" alt="Hero">
       <div class="hero-overlay">
@@ -449,7 +425,6 @@ input[type="text"] {
       </div>
     </div>
 
-    <!-- Search -->
     <div class="search-box">
       <input type="text" id="searchInput" placeholder="Search APIs..." onkeyup="searchApis()">
     </div>
@@ -468,7 +443,6 @@ input[type="text"] {
   </div>
 </div>
 
-<!-- Bottom Navigation -->
 <div class="bottom-nav">
   <a href="/" class="nav-item">
     <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
@@ -486,32 +460,52 @@ input[type="text"] {
 
 <script>
 const BASE_URL = window.location.origin;
-let allEndpoints = [];
 
 async function loadCats(){
-  const res = await fetch('/api/categories');
-  const data = await res.json();
-  document.getElementById('catGrid').innerHTML = data.categories.map(c => `
-    <div class="card" onclick="loadEps('${c.slug}')">
-      <h3>${c.name}</h3>
-      <p>${c.desc}</p>
-      <span class="badge">${c.count} Endpoints</span>
-    </div>
-  `).join('');
+  try {
+    const res = await fetch('/api/categories');
+    const data = await res.json();
+    document.getElementById('catGrid').innerHTML = data.categories.map(c => `
+      <div class="card" onclick="loadEps('${c.slug}')">
+        <h3>${c.name}</h3>
+        <p>${c.desc}</p>
+        <span class="badge">${c.count} Endpoints</span>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('catGrid').innerHTML = '<p style="color:#ef4444">Failed to load categories</p>';
+  }
 }
 
 async function loadEps(slug){
-  const res = await fetch(`/api/endpoints?category=${slug}`);
-  const data = await res.json();
-  allEndpoints = data.endpoints;
-  document.getElementById('catView').style.display = 'none';
-  document.getElementById('epView').style.display = 'block';
-  document.getElementById('catTitle').textContent = data.category;
-  renderEndpoints(data.endpoints);
+  try {
+    const res = await fetch(`/api/endpoints?category=${slug}`);
+    const data = await res.json();
+    document.getElementById('catView').style.display = 'none';
+    document.getElementById('epView').style.display = 'block';
+    document.getElementById('catTitle').textContent = data.category;
+    renderEndpoints(data.endpoints);
+  } catch(e) {
+    alert('Failed to load endpoints');
+  }
 }
 
 function renderEndpoints(endpoints){
-  document.getElementById('epList').innerHTML = endpoints.map(e => `
+  document.getElementById('epList').innerHTML = endpoints.map(e => {
+    const inputFields = e.params.map(p => `
+      <div style="margin-bottom:14px">
+        <label style="display:block;margin-bottom:6px;font-weight:600;font-size:14px">
+          ${p.name} ${p.required?'*':''} 
+          <span style="color:var(--muted);font-size:12px">(${p.type || 'text'})</span>
+        </label>
+        <input type="${p.type === 'file' ? 'file' : 'text'}" 
+               id="inp-${e.path}" 
+               placeholder="${p.desc}"
+               ${p.type === 'file' ? 'accept="image/*,audio/*"' : ''}>
+      </div>
+    `).join('');
+
+    return `
     <div class="endpoint-card">
       <div class="ep-header" onclick="toggle('${e.path}')">
         <svg class="icon" viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
@@ -524,12 +518,7 @@ function renderEndpoints(endpoints){
             <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             TRY IT OUT
           </h4>
-          ${e.params.map(p => `
-            <div style="margin-bottom:14px">
-              <label style="display:block;margin-bottom:6px;font-weight:600;font-size:14px">${p.name} ${p.required?'*':''}</label>
-              <input type="text" id="inp-${e.path}" placeholder="${p.desc}">
-            </div>
-          `).join('')}
+          ${inputFields}
           <button class="btn" onclick="test('${e.path}')">
             <svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             Execute
@@ -537,88 +526,89 @@ function renderEndpoints(endpoints){
         </div>
 
         <div class="ep-section">
-          <h4>Code Examples</h4>
-          <div class="tabs">
-            <button class="tab active" onclick="switchTab(event,'curl-${e.path}')">cURL</button>
-            <button class="tab" onclick="switchTab(event,'node-${e.path}')">Node.js</button>
-            <button class="tab" onclick="switchTab(event,'sdk-${e.path}')">@nexus/api</button>
-          </div>
-          
-          <div id="curl-${e.path}" class="code-tab">
-            <div class="code-block">
-              <button class="copy-btn" onclick="copyCode('curl-code-${e.path}')">Copy</button>
-              <pre id="curl-code-${e.path}">curl -X GET "${BASE_URL}${e.path}?text=Hi"</pre>
-            </div>
-          </div>
-          
-          <div id="node-${e.path}" class="code-tab" style="display:none">
-            <div class="code-block">
-              <button class="copy-btn" onclick="copyCode('node-code-${e.path}')">Copy</button>
-              <pre id="node-code-${e.path}">const res = await fetch("${BASE_URL}${e.path}?text=Hi");</pre>
-            </div>
-          </div>
-          
-          <div id="sdk-${e.path}" class="code-tab" style="display:none">
-            <div class="code-block">
-              <button class="copy-btn" onclick="copyCode('sdk-code-${e.path}')">Copy</button>
-              <pre id="sdk-code-${e.path}">import { Nexus } from '@nexus/api';</pre>
-            </div>
-          </div>
-        </div>
-
-        <div class="ep-section">
           <h4>Response</h4>
-          <div class="code-block">
-            <button class="copy-btn" onclick="copyCode('out-${e.path}')">Copy</button>
-            <pre id="out-${e.path}">Click Execute</pre>
+          <div id="response-${e.path}">
+            <div class="code-block">
+              <pre>Click Execute to test</pre>
+            </div>
           </div>
         </div>
 
         <div class="ep-section">
           <h4>HTTP STATUS CODES</h4>
           <table class="status-table">
-            <tr><td class="status-ok">200</td><td>OK - Request successful</td></tr>
-            <tr><td class="status-err">400</td><td>Bad Request</td></tr>
-            <tr><td class="status-err">405</td><td>Method Not Allowed</td></tr>
-            <tr><td class="status-warn">429</td><td>Too Many Requests</td></tr>
-            <tr><td class="status-err">500</td><td>Internal Server Error</td></tr>
+            <tr><td style="color:#22c55e">200</td><td>OK - Request successful</td></tr>
+            <tr><td style="color:#ef4444">400</td><td>Bad Request</td></tr>
+            <tr><td style="color:#ef4444">405</td><td>Method Not Allowed</td></tr>
+            <tr><td style="color:#f59e0b">429</td><td>Too Many Requests</td></tr>
+            <tr><td style="color:#ef4444">500</td><td>Internal Server Error</td></tr>
           </table>
         </div>
       </div>
     </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-function searchApis(){
-  const query = document.getElementById('searchInput').value.toLowerCase();
-  if(!query){
-    loadCats();
-    return;
+async function test(path){
+  const input = document.getElementById(`inp-${path}`);
+  const outDiv = document.getElementById(`response-${path}`);
+  outDiv.innerHTML = '<div class="code-block"><pre>Loading...</pre></div>';
+  
+  try {
+    let url = path;
+    let options = { method: 'GET' };
+    
+    if (input.type === 'file' && input.files[0]) {
+      const formData = new FormData();
+      formData.append('file', input.files[0]);
+      url = path;
+      options = { method: 'POST', body: formData };
+    } else if (input.value) {
+      url = `${path}?text=${encodeURIComponent(input.value)}`;
+    }
+    
+    const res = await fetch(url, options);
+    const contentType = res.headers.get('content-type') || '';
+    
+    if (contentType.includes('image/')) {
+      const blob = await res.blob();
+      const imgUrl = URL.createObjectURL(blob);
+      outDiv.innerHTML = `
+        <div class="code-block">
+          <img src="${imgUrl}" alt="Response">
+          <div style="margin-top:10px">
+            <a href="${imgUrl}" target="_blank" class="btn" download>Download Image</a>
+          </div>
+        </div>
+      `;
+    } else if (contentType.includes('audio/')) {
+      const blob = await res.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      outDiv.innerHTML = `
+        <div class="code-block">
+          <audio controls src="${audioUrl}" style="width:100%"></audio>
+          <div style="margin-top:10px">
+            <a href="${audioUrl}" target="_blank" class="btn" download>Download Audio</a>
+          </div>
+        </div>
+      `;
+    } else {
+      const data = await res.json();
+      outDiv.innerHTML = `
+        <div class="code-block">
+          <button class="copy-btn" onclick="copyCode('json-${path}')">Copy</button>
+          <pre id="json-${path}">${JSON.stringify(data, null, 2)}</pre>
+        </div>
+      `;
+    }
+  } catch(e) {
+    outDiv.innerHTML = `<div class="code-block"><pre style="color:#ef4444">Error: ${e.message}</pre></div>`;
   }
 }
 
 function toggle(path){
   document.getElementById(`body-${path}`).classList.toggle('active');
-}
-
-async function test(path){
-  const val = document.getElementById(`inp-${path}`).value;
-  const out = document.getElementById(`out-${path}`);
-  out.textContent = 'Loading...';
-  try{
-    const res = await fetch(`${path}?text=${encodeURIComponent(val)}`);
-    out.textContent = JSON.stringify(await res.json(),null,2);
-  }catch(e){
-    out.textContent = 'Error: '+e.message;
-  }
-}
-
-function switchTab(e,id){
-  const parent = e.target.closest('.ep-section');
-  parent.querySelectorAll('.code-tab').forEach(t=>t.style.display='none');
-  parent.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id).style.display='block';
-  e.target.classList.add('active');
 }
 
 function copyCode(id){
@@ -630,6 +620,14 @@ function copyCode(id){
 function showCats(){
   document.getElementById('epView').style.display='none';
   document.getElementById('catView').style.display='block';
+}
+
+function searchApis(){
+  const query = document.getElementById('searchInput').value.toLowerCase();
+  if(!query){
+    loadCats();
+    return;
+  }
 }
 
 loadCats();
